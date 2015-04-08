@@ -1,6 +1,6 @@
 # Event Tracker
 
-Easy tracking using mixpanel, kissmetrics, or Google Analytics (universal analytics).
+Easy tracking using mixpanel, kissmetrics, customer.io or Google Analytics (universal analytics).
 
 For details, see our guide to [tracking events](http://www.doorkeeperhq.com/developer/event-tracker-mixpanel-kissmetrics).
 
@@ -25,6 +25,7 @@ Or install it yourself as:
 config.event_tracker.mixpanel_key = "YOUR_KEY"
 config.event_tracker.kissmetrics_key = "YOUR_KEY"
 config.event_tracker.google_analytics_key = "YOUR_KEY"
+config.event_tracker.customerio_key = "YOUR_KEY"
 
 class ApplicationController < ActionController::Base
   around_filter :append_event_tracking_tags
@@ -39,6 +40,10 @@ class ApplicationController < ActionController::Base
   end
 
   def kissmetrics_identity
+    current_user && current_user.email
+  end
+
+  def customerio_identity
     current_user && current_user.email
   end
 end
