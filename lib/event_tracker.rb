@@ -2,6 +2,7 @@ require "event_tracker/version"
 require "event_tracker/mixpanel"
 require "event_tracker/kissmetrics"
 require "event_tracker/google_analytics"
+require "event_tracker/customerio"
 
 module EventTracker
   module HelperMethods
@@ -56,12 +57,20 @@ module EventTracker
       end
     end
 
+    def customerio_tracker
+      @customerio_tracker ||= begin
+        customerio_key = Rails.application.config.event_tracker.customerio_key
+        EventTracker::Customerio.new(customerio_key) if customerio_key
+      end
+    end
+
     def event_trackers
       @event_trackers ||= begin
         trackers = []
         trackers << mixpanel_tracker if mixpanel_tracker
         trackers << kissmetrics_tracker if kissmetrics_tracker
         trackers << google_analytics_tracker if google_analytics_tracker
+        trackers << customerio_tracker if customerio_tracker
         trackers
       end
     end
@@ -107,6 +116,10 @@ module EventTracker
 
       if identity = respond_to?(:kissmetrics_identity, true) && kissmetrics_identity
         a << kissmetrics_tracker.identify(identity)
+      end
+
+      if identity = respond_to?(:customerio_identity, true) && customerio_identity
+        a << customerio_tracker.identify(identity)
       end
 
       registered_properties = session.delete(:registered_properties)

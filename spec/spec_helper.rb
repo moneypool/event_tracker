@@ -16,6 +16,7 @@ app.config.action_dispatch.show_exceptions = false
 app.config.event_tracker.mixpanel_key = "YOUR_TOKEN"
 app.config.event_tracker.kissmetrics_key = "KISSMETRICS_KEY"
 app.config.event_tracker.google_analytics_key = "GOOGLE_ANALYTICS_KEY"
+app.config.event_tracker.customerio_key = "CUSTOMERIO_KEY"
 
 app.initialize!
 
@@ -27,4 +28,3 @@ class ApplicationController < ActionController::Base; end
 
 require 'rspec/rails'
 require "steak"
-

@@ -1,35 +1,40 @@
 require "spec_helper"
 
 shared_examples_for "init" do
-  subject { page.find("head script").native.content }
+  subject { page.find("head script", visible: false).native.content }
   it { should include('mixpanel.init("YOUR_TOKEN")') }
   it { should include(%q{var _kmk = _kmk || 'KISSMETRICS_KEY'}) }
   it { should include(%q{ga('create', 'GOOGLE_ANALYTICS_KEY', 'auto', {'name': 'event_tracker'});}) }
+  it { should include(%q{t.setAttribute('data-site-id', "CUSTOMERIO_KEY")}) }
 end
 
 shared_examples_for "without distinct id" do
   it { should_not include(%q{_kmq.push(['identify', 'name@email.com']);}) }
   it { should_not include('mixpanel.identify("distinct_id")') }
+  it { should_not include(%q{_cio.identify("distinct_id");}) }
 end
 
 shared_examples_for "with distinct id" do
   it { should include(%q{_kmq.push(['identify', 'name@email.com']);}) }
   it { should include('mixpanel.identify("distinct_id")') }
+  it { should include('_cio.identify("distinct_id");') }
 end
 
 shared_examples_for "without event" do
   it { should_not include('mixpanel.track("Register for site")') }
   it { should_not include(%q{ga('event_tracker.send', 'event', 'event_tracker', 'Register for site');}) }
+  it { should_not include(%q{_cio.track("Register for site");})}
 end
 
 shared_examples_for "with event" do
   it { should include('mixpanel.track("Register for site")') }
   it { should include(%q{_kmq.push(['record', 'Register for site']);}) }
   it { should include(%q{ga('event_tracker.send', 'event', 'event_tracker', 'Register for site');}) }
+  it { should include(%q{_cio.track("Register for site");})}
 end
 
 feature 'basic integration' do
-  subject { page.find("body script").native.content }
+  subject { page.find("body script", visible: false).native.content }
 
   class BasicController < ApplicationController
     around_filter :append_event_tracking_tags
@@ -105,6 +110,7 @@ feature 'basic integration' do
     it { should include %Q{mixpanel.register({"age":19,"gender":"female"})} }
     it { should include %Q{_kmq.push(['record', 'Take an action', {"property1":"a","property2":1}])} }
     it { should include %Q{_kmq.push(['set', {"age":19,"gender":"female"}])} }
+    it { should include %Q{_cio.track("Take an action", {"property1":"a","property2":1});} }
   end
 
   class IdentityController < ApplicationController
@@ -115,6 +121,10 @@ feature 'basic integration' do
 
     def kissmetrics_identity
       "name@email.com"
+    end
+
+    def customerio_identity
+      "distinct_id"
     end
 
     def index
@@ -149,6 +159,7 @@ feature 'basic integration' do
     private
     def mixpanel_distinct_id; "distinct_id"; end
     def kissmetrics_identity; "name@email.com"; end
+    def customerio_identity; "distinct_id"; end
   end
 
   context "with private methods" do
