@@ -48,6 +48,10 @@ class EventTracker::Mixpanel
     %Q{mixpanel.people.increment(#{properties.to_json});}
   end
 
+  def people_track_charge(amount)
+    %Q{mixpanel.people.track_charge(#{amount.to_json});}
+  end
+
   def set_config(properties)
     %Q{mixpanel.set_config(#{properties.to_json});}
   end

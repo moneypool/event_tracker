@@ -29,6 +29,10 @@ module EventTracker
       (session[:mixpanel_people_increment] ||= []) << event_name
     end
 
+    def mixpanel_people_track_charge(amount)
+      session[:mixpanel_people_track_charge] = amount
+    end
+
     def mixpanel_alias(identity)
       session[:mixpanel_alias] = identity
     end
@@ -103,6 +107,10 @@ module EventTracker
 
       if (people = session.delete(:mixpanel_people_increment)).present?
         a << mixpanel_tracker.people_increment(people)
+      end
+
+      if (people = session.delete(:mixpanel_people_track_charge)).present?
+        a << mixpanel_tracker.people_track_charge(people)
       end
 
       if identity = respond_to?(:kissmetrics_identity, true) && kissmetrics_identity
